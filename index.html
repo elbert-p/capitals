@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Capitals Quiz Game</title>
+  <style>
+    /* Reset and Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* Align items to the top */
+      padding-top: 20px; /* Add top padding */
+      min-height: 100vh;
+    }
+
+    /* Container Styles */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      width: auto;
+      max-width: 500px; /* Prevent excessive width */
+    }
+
+    /* Start Screen Specific */
+    .start-container {
+      padding: 25px;
+    }
+    .game-container {
+      padding: 15px;
+    }
+    .end-container{
+      padding: 15px;
+    }
+
+    /* General Button Styles */
+    .button {
+      padding: 10px 15px; /* Consistent padding */
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background-color: #f0f0f0;
+      margin: 5px 0; /* Vertical margin only */
+      border-radius: 5px;
+      font-size: 14px;
+      transition: background-color 0.3s;
+      min-width: 60px; /* Minimum width */
+    }
+
+    .button:hover {
+      background-color: #e0e0e0;
+    }
+
+    .title {
+      font-size: 20px;
+      padding:0 70px 20px 70px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .label {
+      font-size: 16px;
+      padding: 10px 0;
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    /* Select Questions Buttons in a Single Row */
+    .select-questions {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin: 8px 0;
+      gap: 5px; /* Equal spacing between buttons */
+    }
+
+    .select-questions .button {
+      flex: 1;
+      max-width: 80px;
+      min-width: 60px;
+    }
+
+    .startButton {
+      width: 100%;
+      margin: 5px 0;
+      min-width: 80px;
+    }
+
+    .button.checked {
+      background-color: #95BDFF;
+      color: white;
+    }
+
+    /* Wrapper for "None" button and "Continents" label */
+    .continents-header {
+      display: flex;
+      align-items: center;
+      width: 100%;
+/*      margin-top: 10px;*/
+      position: relative;
+    }
+
+    .continents-header .label {
+      width: 100%;
+      text-align: center;
+      margin: 0;
+    }
+
+    .continents-header #noneButton {
+      position: absolute;
+      left: 0;
+      padding: 10px 15px;
+      font-size: 14px;
+      min-width: 60px;
+    }
+
+    /* Continents Grid */
+    .continents-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 5px; /* Uniform spacing */
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .continents-grid .button {
+      margin: 0; /* Remove vertical spacing */
+      min-width: 80px;
+    }
+
+    /* Answer Buttons Wrapper */
+    .answer-buttons {
+      display: none; /* Initially hidden */
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-top: 10px;
+      gap: 8px; /* Remove gaps */
+    }
+
+    .answer-buttons .button {
+      width: 100%;
+      max-width: 200px;
+      margin: 0; /* Remove margins */
+      min-width: 120px;
+    }
+
+    /* Status Row */
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 8px; /* Remove top margin */
+      gap: 10px; /* Equal spacing */
+    }
+
+    .status-row .status-item {
+      font-size: 14px;
+      flex: 1;
+      text-align: center;
+      min-width: 70px;
+      padding: 5px 0;
+    }
+
+    /* End Screen Styles */
+    .end-container .endLabel {
+      font-size: 16px;
+      margin: 0 0 10px 0;
+      text-align: center;
+    }
+
+    .end-container .status-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 10px;
+      gap: 10px;
+    }
+
+    .end-container .status-row .status-item {
+      font-size: 18px;
+      flex: 1;
+      text-align: center;
+      min-width: 70px;
+      padding: 5px 0;
+    }
+
+    .end-container .button {
+      width: 45%;
+      min-width: 120px;
+    }
+
+    /* All Buttons Darker on Click */
+    .button:active {
+      filter: brightness(90%); /* Darkens the button when clicked */
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Country and Capital Data
+    const africaCo = ["Algeria","Angola","Benin","Botswana","Burkina Faso","Burundi","Cameroon","Cape Verde","Central African Republic","Chad","Comoros","DR Congo","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia","Gabon","Gambia","Ghana","Guinea","Guinea-Bissau","Ivory Coast","Kenya","Lesotho","Liberia","Libya","Madagascar","Malawi","Mali","Mauritania","Mauritius","Morocco","Mozambique","Namibia","Niger","Nigeria","Republic of the Congo","Rwanda","São Tomé and Príncipe","Senegal","Seychelles","Sierra Leone","Somalia","South Africa","South Sudan","Sudan","Tanzania","Togo","Tunisia","Uganda","Zambia","Zimbabwe"];
+    const africaCa = ["Algiers","Luanda","Porto Novo","Gaborone","Ouagadougou","Gitega","Yaoundé","Praia","Bangui","N'Djamena","Moroni","Kinshasa","Djibouti","Cairo","Malabo","Asmara","Mbabane","Addis Ababa","Libreville","Banjul","Accra","Conakry","Bissau","Yamoussoukro","Nairobi","Maseru","Monrovia","Tripoli","Antananarivo","Lilongwe","Bamako","Nouakchott","Port Louis","Rabat","Maputo","Windhoek","Niamey","Abuja","Brazzaville","Kigali","São Tomé","Dakar","Victoria","Freetown","Mogadishu","Pretoria","Juba","Khartoum","Dodoma","Lomé","Tunis","Kampala","Lusaka","Harare"];
+    const asiaCo = ["Afghanistan","Armenia","Azerbaijan","Bahrain","Bangladesh","Bhutan","Brunei","Cambodia","China","Georgia","India","Indonesia","Iran","Iraq","Israel","Japan","Jordan","Kazakhstan","North Korea","South Korea","Kuwait","Kyrgyzstan","Laos","Lebanon","Malaysia","Maldives","Mongolia","Myanmar","Nepal","Oman","Pakistan","Palestine","Philippines","Qatar","Saudi Arabia","Singapore","Sri Lanka","Syria","Taiwan","Tajikistan","Thailand","Turkey","Turkmenistan","United Arab Emirates","Uzbekistan","Vietnam","Yemen"];
+    const asiaCa = ["Kabul","Yerevan","Baku","Manama","Dhaka","Thimphu","Bandar Seri Begawan","Phnom Penh","Beijing","Tbilisi","New Delhi","Jakarta","Tehran","Baghdad","Jerusalem","Tokyo","Amman","Astana","Pyongyang","Seoul","Kuwait City","Bishkek","Vientiane","Beirut","Kuala Lumpur","Malé","Ulaanbaatar","Naypyidaw","Kathmandu","Muscat","Islamabad","East Jerusalem","Manila","Doha","Riyadh","Singapore","Sri Jayawardenapura Kotte","Damascus","Taipei","Dushanbe","Bangkok","Ankara","Ashgabat","Abu Dhabi","Tashkent","Hanoi","Sana'a"];
+    const europeCo = ["Albania","Andorra","Austria","Belarus","Belgium","Bosnia and Herzegovina","Bulgaria","Croatia","Cyprus","Czech Republic","Denmark","Estonia","Finland","France","Germany","Greece","Hungary","Iceland","Ireland","Italy","Kosovo","Latvia","Liechtenstein","Lithuania","Luxembourg","Malta","Moldova","Monaco","Montenegro","Netherlands","North Macedonia","Norway","Poland","Portugal","Romania","Russia","San Marino","Serbia","Slovakia","Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom","Vatican City"];
+    const europeCa = ["Tirana","Andorra la Vella","Vienna","Minsk","Brussels","Sarajevo","Sofia","Zagreb","Nicosia","Prague","Copenhagen","Tallinn","Helsinki","Paris","Berlin","Athens","Budapest","Reykjavík","Dublin","Rome","Pristina","Riga","Vaduz","Vilnius","Luxembourg","Valletta","Chișinău","Monaco","Podgorica","Amsterdam","Skopje","Oslo","Warsaw","Lisbon","Bucharest","Moscow","San Marino","Belgrade","Bratislava","Ljubljana","Madrid","Stockholm","Bern","Kyiv","London","Vatican City"];
+    const nAmericaCo = ["Antigua and Barbuda","Bahamas","Barbados","Belize","Canada","Costa Rica","Cuba","Dominica","Dominican Republic","El Salvador","Grenada","Guatemala","Haiti","Honduras","Jamaica","Mexico","Nicaragua","Panama","Saint Kitts and Nevis","Saint Lucia","Saint Vincent & Grenadines","Trinidad and Tobago","United States"];
+    const nAmericaCa = ["St. John's","Nassau","Bridgetown","Belmopan","Ottawa","San José","Havana","Roseau","Santo Domingo","San Salvador","St. George's","Guatemala City","Port-au-Prince","Tegucigalpa","Kingston","Mexico City","Managua","Panama City","Basseterre","Castries","Kingstown","Port of Spain","Washington D.C."];
+    const oceaniaCo = ["Australia","East Timor","Fiji","Kiribati","Marshall Islands","Micronesia","Nauru","New Zealand","Palau","Papua New Guinea","Samoa","Solomon Islands","Tonga","Tuvalu","Vanuatu"];
+    const oceaniaCa = ["Canberra","Dili","Suva","Tarawa","Majuro","Palikir","Yaren","Wellington","Melekeok","Port Moresby","Apia","Honiara","Nuku'alofa","Funafuti","Port Vila"];
+    const sAmericaCo = ["Argentina","Bolivia","Brazil","Chile","Colombia","Ecuador","Guyana","Paraguay","Peru","Suriname","Uruguay","Venezuela"];
+    const sAmericaCa = ["Buenos Aires","Sucre","Brasilia","Santiago","Bogota","Quito","Georgetown","Asunción","Lima","Paramaribo","Montevideo","Caracas"];
+
+    const countriesArr = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"];
+    const numOfQuestionsArr = [10, 25, 50, 100, "All"];
+
+    const countries = africaCo.concat(nAmericaCo, sAmericaCo, europeCo, asiaCo, oceaniaCo);
+    const capitals = africaCa.concat(nAmericaCa, sAmericaCa, europeCa, asiaCa, oceaniaCa);
+
+    // Game Variables
+    let tempCountries;
+    let tempCapitals;
+    let selectedCountries;
+    let selectedCapitals;
+    let preCheck;
+    let score = 0;
+    let time = 0;
+    let timeString = '00:00.00';
+    let timerOn;
+    let questionNum = 1;
+    let totalQuestions = 10;
+    let currentCountry;
+    let currentCapital;
+    let answered = false;
+
+    // Create Game Layout
+    function createLayout(){
+      // Create Game Container
+      let gameContainer = document.createElement('div');
+      gameContainer.id = 'gameContainer';
+      gameContainer.className = 'container game-container';
+      document.body.appendChild(gameContainer);
+
+      // Country Label
+      let countryText = document.createElement('div');
+      countryText.id = "countryLabel";
+      countryText.className = "label";
+      gameContainer.appendChild(countryText);
+
+      // Answer Box
+      let answerBox = document.createElement('div');
+      answerBox.id = 'answerBox';
+      answerBox.className = 'button';
+      answerBox.innerHTML = 'Click to show answer';
+      answerBox.addEventListener('click', showAnswer);
+      gameContainer.appendChild(answerBox);
+
+      // Answer Buttons Wrapper
+      let answerButtonsDiv = document.createElement('div');
+      answerButtonsDiv.className = 'answer-buttons';
+
+      // Correct Button
+      let correctButton = document.createElement('button');
+      correctButton.id = 'correctButton';
+      correctButton.innerHTML = 'Correct';
+      correctButton.className = 'button';
+      correctButton.style.backgroundColor = 'rgba(0, 128, 0, 0.5)'; // Green with 50% opacity
+      correctButton.style.color = 'white'; // Ensure text is visible
+      correctButton.addEventListener('click', correctAnswer);
+      answerButtonsDiv.appendChild(correctButton);
+
+      // Incorrect Button
+      let incorrectButton = document.createElement('button');
+      incorrectButton.id = 'incorrectButton';
+      incorrectButton.innerHTML = 'Incorrect';
+      incorrectButton.className = 'button';
+      incorrectButton.style.backgroundColor = 'rgba(255, 0, 0, 0.8)'; // Red with 80% opacity
+      incorrectButton.style.color = 'white'; // Ensure text is visible
+      incorrectButton.addEventListener('click', next);
+      answerButtonsDiv.appendChild(incorrectButton);
+
+      gameContainer.appendChild(answerButtonsDiv);
+
+      // Status Row (Progress, Time, Score)
+      let statusRow = document.createElement('div');
+      statusRow.className = 'status-row';
+
+      let progressText = document.createElement('div');
+      progressText.id = "progress";
+      progressText.className = "status-item";
+      progressText.innerHTML = questionNum + "/" + totalQuestions;
+      statusRow.appendChild(progressText);
+
+      let timeText = document.createElement('div');
+      timeText.id = "timeText";
+      timeText.className = "status-item";
+      timeText.innerHTML = timeString;
+      statusRow.appendChild(timeText);
+
+      let scoreText = document.createElement('div');
+      scoreText.id = "score";
+      scoreText.className = "status-item";
+      scoreText.innerHTML = score;
+      statusRow.appendChild(scoreText);
+
+      gameContainer.appendChild(statusRow);
+    }
+
+    // Load Next Level
+    function level(){
+      if(tempCountries.length === 0){
+        endscreen();
+        return;
+      }
+      let countryIndex = Math.floor(Math.random() * tempCountries.length);
+      currentCountry = tempCountries[countryIndex];
+      currentCapital = tempCapitals[countryIndex];
+      document.getElementById('countryLabel').innerHTML = currentCountry;
+      document.getElementById('answerBox').innerHTML = 'Click to show answer';
+      document.getElementById('answerBox').addEventListener('click', showAnswer);
+
+      // Remove used country and capital
+      tempCountries.splice(countryIndex, 1);
+      tempCapitals.splice(countryIndex, 1);
+    }
+
+    // Show Answer
+    function showAnswer(){
+      if(answered){
+        return;
+      }
+      answered = true;
+      timerOn = false;
+      document.getElementById('answerBox').innerHTML = currentCapital;
+      document.getElementById('answerBox').removeEventListener('click', showAnswer);
+      document.querySelector('.answer-buttons').style.display = 'flex'; // Show answer buttons
+    }
+
+    // Correct Answer Handler
+    function correctAnswer(){
+      score += 1;
+      document.getElementById("score").innerHTML = score;
+      next();
+    }
+
+    // Proceed to Next Question
+    function next(){
+      answered = false;
+      document.querySelector('.answer-buttons').style.display = 'none'; // Hide answer buttons
+      document.getElementById('answerBox').innerHTML = 'Click to show answer';
+      document.getElementById('answerBox').addEventListener('click', showAnswer);
+      if(questionNum >= totalQuestions){
+        timerOn = false;
+        endscreen();
+      } else {
+        timerOn = true;
+        timer();
+        questionNum += 1;
+        document.getElementById('progress').innerHTML = questionNum + "/" + totalQuestions;
+        level();
+      }
+    }
+
+    // Select Number of Questions
+    function selectQuestions(i){
+      const buttons = document.querySelectorAll('.select-questions .button');
+      buttons.forEach((btn, index) => {
+        if(index === i){
+          btn.classList.toggle('checked');
+        } else {
+          btn.classList.remove('checked');
+        }
+      });
+    }
+
+    // Timer Function
+    function timer(){
+      if(timerOn){
+        time++;
+        let totalMilliseconds = time * 10;
+        let date = new Date(totalMilliseconds);
+        let minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        let seconds = String(date.getUTCSeconds()).padStart(2, '0');
+        let centiseconds = String(Math.floor((totalMilliseconds % 1000) / 10)).padStart(2, '0');
+        timeString = `${minutes}:${seconds}.${centiseconds}`;
+        document.getElementById('timeText').innerHTML = timeString;
+        setTimeout(timer, 10);
+      }
+    }
+
+    // Start Timer
+    function startTimer(){
+      time = 0;
+      timerOn = true;
+      timer();
+    }
+
+    // Initialize Game
+    function game(){
+      createLayout();
+      startTimer();
+      tempCountries = selectedCountries.slice();
+      tempCapitals = selectedCapitals.slice();
+      level();
+    }
+
+    // Reset Game Variables
+    function reset(){
+      score = 0;
+      questionNum = 1;
+      time = 0;
+      timeString = '00:00.00';
+    }
+
+    // Start Game
+    function start(){
+      selectedCountries = [];
+      selectedCapitals = [];
+      preCheck = [];
+      for(let i = 0; i < 6; i++){
+        let toAddCo = [];
+        let toAddCa = [];
+        preCheck[i+5] = false;
+        if(document.getElementById('selectC'+i).classList.contains('checked')){
+          preCheck[i+5] = true;
+          switch(i){
+            case 0: toAddCo = africaCo; toAddCa = africaCa; break;
+            case 1: toAddCo = asiaCo; toAddCa = asiaCa; break;
+            case 2: toAddCo = europeCo; toAddCa = europeCa; break;
+            case 3: toAddCo = nAmericaCo; toAddCa = nAmericaCa; break;
+            case 4: toAddCo = oceaniaCo; toAddCa = oceaniaCa; break; 
+            case 5: toAddCo = sAmericaCo; toAddCa = sAmericaCa; break;
+          }
+          
+          selectedCountries = selectedCountries.concat(toAddCo);
+          selectedCapitals = selectedCapitals.concat(toAddCa);
+        }
+      }
+      if(selectedCountries.length === 0){
+        alert("Please select at least one continent.");
+        return;
+      }
+      for(let i = 0; i < 5; i++){
+        preCheck[i] = false;
+        if(document.getElementById('selectQnum'+i).classList.contains('checked')){
+          preCheck[i] = true;
+          if(i === 4){
+            totalQuestions = selectedCountries.length;
+          } else {
+            totalQuestions = numOfQuestionsArr[i];
+          }
+        }
+      }
+      if(totalQuestions > selectedCountries.length){
+        totalQuestions = selectedCountries.length;
+      }
+      document.getElementById('startContainer').remove();
+      reset();
+      game();
+    }
+
+    // Restart Game
+    function restart(){
+      document.getElementById('endContainer').remove();
+      reset();
+      game();
+    }
+
+    // Return to Home Screen
+    function home(){
+      document.getElementById('endContainer').remove();
+      reset();
+      startScreen();
+      for(let i = 0; i < 11; i++){
+        if(i < 5){
+          if(preCheck[i]){
+            document.getElementById('selectQnum'+i).classList.add('checked');
+          } else {
+            document.getElementById('selectQnum'+i).classList.remove('checked');
+          }
+        } else {
+          if(preCheck[i]){
+            document.getElementById('selectC'+(i-5)).classList.add('checked');
+          } else {
+            document.getElementById('selectC'+(i-5)).classList.remove('checked');
+          }
+        }
+      }
+    }
+
+    // Clear All Continent Selections
+    function clearContinents(){
+      for(let i = 0; i < 6; i++){
+        document.getElementById('selectC'+i).classList.remove('checked');
+      }
+    }
+
+    // Start Screen Layout
+    function startScreen(){
+      let startContainer = document.createElement('div');
+      startContainer.id = 'startContainer';
+      startContainer.className = 'container start-container';
+      document.body.appendChild(startContainer);
+
+      // Number of Capitals Label
+      let selectQLabel = document.createElement('div');
+      selectQLabel.innerHTML = "Number of Capitals";
+      selectQLabel.className = "label";
+      startContainer.appendChild(selectQLabel);
+
+      // Number of Questions Buttons in Single Row
+      let selectQuestionsDiv = document.createElement('div');
+      selectQuestionsDiv.className = 'select-questions';
+      startContainer.appendChild(selectQuestionsDiv);
+
+      for(let i = 0; i < 5; i++){
+        let selectQnum = document.createElement('button');
+        selectQnum.id = 'selectQnum'+i;
+        selectQnum.innerHTML = numOfQuestionsArr[i];
+        selectQnum.className = 'button';
+        if(i === 0){ selectQnum.classList.add('checked'); }
+        selectQnum.addEventListener('click', () => selectQuestions(i));
+        selectQuestionsDiv.appendChild(selectQnum);
+      }
+
+      // Continents Header with "None" Button
+      let continentsHeader = document.createElement('div');
+      continentsHeader.className = 'continents-header';
+
+      let noneButton = document.createElement('button');
+      noneButton.id = 'noneButton';
+      noneButton.innerHTML = 'None';
+      noneButton.className = 'button';
+      noneButton.addEventListener('click', clearContinents);
+      continentsHeader.appendChild(noneButton);
+
+      let selectCLabel = document.createElement('div');
+      selectCLabel.innerHTML = "Continents";
+      selectCLabel.className = "label";
+      continentsHeader.appendChild(selectCLabel);
+
+      startContainer.appendChild(continentsHeader);
+
+      // Continents Selection Buttons in 3 Columns and 2 Rows
+      let continentsGrid = document.createElement('div');
+      continentsGrid.className = 'continents-grid';
+      startContainer.appendChild(continentsGrid);
+
+      for(let i = 0; i < 6; i++){
+        let selectC = document.createElement('button');
+        selectC.id = 'selectC'+i;
+        selectC.innerHTML = countriesArr[i];
+        selectC.className = 'button startButton checked';
+        selectC.addEventListener('click', () => {
+          document.getElementById('selectC'+i).classList.toggle('checked');
+        });
+        continentsGrid.appendChild(selectC);
+      }
+
+      // Start Button with Top Margin
+      let startButton = document.createElement('button');
+      startButton.id = 'startButton';
+      startButton.className = 'button';
+      startButton.innerHTML = 'Start';
+      startButton.style.width = '100%';
+      startButton.style.marginTop = '20px'; // Added top margin
+      startButton.addEventListener('click', start);
+      startContainer.appendChild(startButton);
+    }
+
+    // End Screen Layout
+    function endscreen(){
+      // Remove Game Container
+      document.getElementById('gameContainer').remove();
+
+      // Create End Container
+      let endContainer = document.createElement('div');
+      endContainer.id = 'endContainer';
+      endContainer.className = 'container end-container';
+      document.body.appendChild(endContainer);
+
+      // Results Label with Padding
+      let resultsLabel = document.createElement('div');
+      resultsLabel.className = 'title';
+      resultsLabel.innerHTML = 'Results';
+      endContainer.appendChild(resultsLabel);
+
+      // Time Label
+      let timeLabel = document.createElement('div');
+      timeLabel.className = "label";
+      timeLabel.innerHTML = 'Time';
+      endContainer.appendChild(timeLabel);
+
+      // Time Number
+      let timeNum = document.createElement('div');
+      timeNum.id = "timeNum";
+      timeNum.className = "endLabel";
+      timeNum.innerHTML = timeString;
+      endContainer.appendChild(timeNum);
+
+      // Accuracy Label
+      let accuracyLabel = document.createElement('div');
+      accuracyLabel.className = "label";
+      accuracyLabel.innerHTML = 'Accuracy';
+      endContainer.appendChild(accuracyLabel);
+
+      // Accuracy Number
+      let accuracyNum = document.createElement('div');
+      accuracyNum.id = "accuracyNum";
+      accuracyNum.className = "endLabel";
+      accuracyNum.innerHTML = Math.round((10000 * score) / totalQuestions) / 100 + '%';
+      endContainer.appendChild(accuracyNum);
+
+      // Score Label
+      let scoreLabel = document.createElement('div');
+      scoreLabel.className = "label";
+      scoreLabel.innerHTML = 'Score';
+      endContainer.appendChild(scoreLabel);
+
+      // Score Number
+      let scoreNum = document.createElement('div');
+      scoreNum.id = 'scoreNum';
+      scoreNum.className = "endLabel";
+      scoreNum.innerHTML = score + " of " + totalQuestions;
+      endContainer.appendChild(scoreNum);
+
+      // Restart and Home Buttons
+      let restartButton = document.createElement('button');
+      restartButton.id = 'restartButton';
+      restartButton.innerHTML = 'Restart';
+      restartButton.className = 'button';
+      restartButton.addEventListener('click', restart);
+      endContainer.appendChild(restartButton);
+
+      let homeButton = document.createElement('button');
+      homeButton.id = 'homeButton';
+      homeButton.innerHTML = 'Home';
+      homeButton.className = 'button';
+      homeButton.addEventListener('click', home);
+      endContainer.appendChild(homeButton);
+    }
+
+    // Initialize Start Screen
+    startScreen();
+  </script>
+</body>
+</html>
